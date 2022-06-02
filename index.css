@@ -1,27 +1,22 @@
 .match__container {
-    width: 750px;
-    margin: 0 auto;
+    display: grid;
+    justify-content: center;
+    align-content: start;
 }
 .match__grid {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    height: 600px;
-    width: 100%;
-    border: 1px solid black;
+    display: grid;
+    justify-content: center;
+    width: 80vw;
+    height: 80vh;
+    grid-gap: 20px;
 }
-.match__sub-grid {
-    display: flex;
-    flex-grow: 1;
-}
+
 .match__grid-cell {
-    display: flex;
-    flex-grow: 1;
+    display: grid;
     justify-content: center;
     align-items: center;
     background-color: red;
     border: 2px solid black;
-    margin: 20px;
 }
 
 .match__grid-cell.is-match {
@@ -31,6 +26,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin: 0 auto;
+    width: 800px;
 }
 .match__navigation h3 {
     justify-self: start;
