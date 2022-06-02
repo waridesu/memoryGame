@@ -11,33 +11,30 @@ class MatchGrid {
         this.width = width
         this.heigth = height
         this.time = time
+        this.toggleCardCallBack = this.toggleCard.bind(this)
     }
+
     startTimer() {
-        const time = this.time
-        msgContainer.innerHTML = `time: <span class="counter"></span> seconds remaining!`
-        const counter = msgContainer.querySelector('.counter');
-
-        counter.innerHTML = time
-
-        this.counterTimer(counter, time)
-    }
-
-    counterTimer(counter, time) {
-        setInterval(() => {
+        let time = this.time
+        msgContainer.innerHTML = `time: <span class="counter">${time}</span> seconds remaining!`
+        const interval = setInterval( () => {
             time = --time
-            if(time >= 0) {
-                counter.innerHTML = time
-                    } else {
+            if (time > 0) {
+                if (msgContainer.querySelector('.counter')) {
+                    msgContainer.querySelector('.counter').innerHTML = time
+                }
+            } else {
                 msgContainer.innerHTML = 'time out';
-                pageWrapper.removeEventListener('click', this.toggleCard.bind(this), false)
-            }
-        }, 1000);
+                pageWrapper.removeEventListener('click', this.toggleCardCallBack)
+                clearInterval(interval);
+            } }, 1000);
     }
+
     initiateBoard() {
         let renderMatrix = new Array(this.width * this.heigth)
             .fill(null)
             .map((_, i) => ++i);
-        renderMatrix = [...renderMatrix].slice(0, renderMatrix.length / 2 )
+        renderMatrix = [...renderMatrix].slice(0, renderMatrix.length / 2)
             .reduce((res, cur) => [...res, cur, cur], [])
             .sort(() => Math.random() - 0.5);
         renderMatrix.forEach(el => {
@@ -47,7 +44,7 @@ class MatchGrid {
             pageWrapper.appendChild(activity);
         })
         pageWrapper.style.gridTemplate = `repeat(${this.heigth}, 1fr)/repeat(${this.width}, 1fr)`;
-        pageWrapper.addEventListener('click', this.toggleCard.bind(this))
+        pageWrapper.addEventListener('click', this.toggleCardCallBack)
         this.startTimer();
     }
 
@@ -57,7 +54,7 @@ class MatchGrid {
                 const cardId = event.target.getAttribute('data-id')
                 const elIndex = [].indexOf.call(event.target.parentElement.children, event.target);
                 event.target.innerHTML = cardId;
-                if((this.chosenCardsIds.length === 0) || this.chosenCardsIds.some(({index}) => index !== elIndex)) {
+                if ((this.chosenCardsIds.length === 0) || this.chosenCardsIds.some(({index}) => index !== elIndex)) {
                     this.chosenCardsIds.push({id: cardId, index: elIndex})
                 }
                 if (this.chosenCardsIds.length === 2) {
@@ -80,21 +77,19 @@ class MatchGrid {
     }
 }
 
-const newGame = new MatchGrid(5, 3, 10);
+const newGame = new MatchGrid(5, 3, 5);
 
 startBtn.addEventListener('click', startHandler);
 resetBtn.addEventListener('click', resetHandler);
 
 function resetHandler() {
-    while (pageWrapper.lastElementChild) {
-        pageWrapper.removeChild(pageWrapper.lastElementChild);
-    }
-    pageWrapper.removeEventListener('click', newGame.toggleCard, false)
+    pageWrapper.replaceChildren();
+    pageWrapper.removeEventListener('click', newGame.toggleCardCallBack)
     newGame.initiateBoard();
 }
 
 function startHandler(event) {
     newGame.initiateBoard();
-    event.target.removeEventListener('click', startHandler, false);
+    event.target.removeEventListener('click', startHandler);
     startBtn.remove();
 }

@@ -27,7 +27,7 @@
     align-items: center;
     justify-content: space-between;
     margin: 0 auto;
-    width: 800px;
+    width: 80vw;
 }
 .match__navigation h3 {
     justify-self: start;
