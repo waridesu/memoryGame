@@ -1,0 +1,38 @@
+.match__container {
+    width: 750px;
+    margin: 0 auto;
+}
+.match__grid {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    height: 600px;
+    width: 100%;
+    border: 1px solid black;
+}
+.match__sub-grid {
+    display: flex;
+    flex-grow: 1;
+}
+.match__grid-cell {
+    display: flex;
+    flex-grow: 1;
+    justify-content: center;
+    align-items: center;
+    background-color: red;
+    border: 2px solid black;
+    margin: 20px;
+}
+
+.match__grid-cell.is-match {
+    background-color: green;
+}
+.match__navigation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.match__navigation h3 {
+    justify-self: start;
+}
+
