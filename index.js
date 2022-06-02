@@ -16,13 +16,13 @@ class MatchGrid {
 
     startTimer() {
         let time = this.time
-        msgContainer.innerHTML = `time: <span class="counter">${time}</span> seconds remaining!`
+        msgContainer.innerHTML = `time: <span class="counter">${time}</span> seconds remaining!`;
+        const counter = msgContainer.querySelector('.counter')
         const interval = setInterval( () => {
             time = --time
             if (time > 0) {
-                if (msgContainer.querySelector('.counter')) {
-                    msgContainer.querySelector('.counter').innerHTML = time
-                }
+                counter.innerHTML = time
+
             } else {
                 msgContainer.innerHTML = 'time out';
                 pageWrapper.removeEventListener('click', this.toggleCardCallBack)
@@ -43,7 +43,7 @@ class MatchGrid {
             activity.setAttribute('data-id', el);
             pageWrapper.appendChild(activity);
         })
-        pageWrapper.style.gridTemplate = `repeat(${this.heigth}, 1fr)/repeat(${this.width}, 1fr)`;
+        pageWrapper.style.gridTemplate = `repeat(${this.heigth},2fr)/repeat(${this.width}, 2fr)`;
         pageWrapper.addEventListener('click', this.toggleCardCallBack)
         this.startTimer();
     }
@@ -77,7 +77,7 @@ class MatchGrid {
     }
 }
 
-const newGame = new MatchGrid(5, 3, 5);
+const newGame = new MatchGrid(5, 3, 20 );
 
 startBtn.addEventListener('click', startHandler);
 resetBtn.addEventListener('click', resetHandler);
