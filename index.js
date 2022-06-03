@@ -11,7 +11,6 @@ class MatchGrid {
     _outCardsCb = this._outHandler.bind(this)
     _hoverCardsCb = this._hoverCardHelper.bind(this)
 
-
     constructor(width, height, time, theme) {
         this.width = width
         this.heigth = height
@@ -21,6 +20,7 @@ class MatchGrid {
 
     startTimer() {
         let time = this.time
+        msgContainer.classList.remove('is-win','is-lose')
         anime({
             targets: msgContainer,
             translateY: 0,
@@ -56,6 +56,7 @@ class MatchGrid {
         msgContainer.innerHTML = message;
         anime({
             targets: msgContainer,
+            background: 'red'/*message === 'you won' ? '--isSolved' : '--isUnsolved'*/,
             translateY: {
                 value: ['0', '30vh'],
             },
@@ -63,6 +64,7 @@ class MatchGrid {
             easing: 'linear',
             duration: 3000,
         })
+        msgContainer.classList.add(message === 'you won' ? 'is-win': 'is-lose')
         this._isPaused = true;
     }
     initiateBoard() {
@@ -72,16 +74,17 @@ class MatchGrid {
             activity.setAttribute('data-id', el);
             pageWrapper.appendChild(activity);
         })
-        root.style.setProperty('--isSolved', this.theme[0]);
-        root.style.setProperty('--isUnsolved', this.theme[1]);
-        root.style.setProperty('--changed-font', this.theme[2]);
-        console.log(this.theme);
 
         pageWrapper.style.gridTemplate = `repeat(${this.heigth},2fr)/repeat(${this.width}, 2fr)`;
         this._addingWrapperListener();
         this.startTimer();
     }
 
+    initStyles() {
+        root.style.setProperty('--isSolved', this.theme[0]);
+        root.style.setProperty('--isUnsolved', this.theme[1]);
+        root.style.setProperty('--changed-font', this.theme[2]);
+    }
     _addingWrapperListener() {
         pageWrapper.addEventListener('click', this.toggleCardCb)
         pageWrapper.addEventListener('mouseover', this._hoverCardsCb)
@@ -153,7 +156,9 @@ class MatchGrid {
     }
 }
 
-const newGame = new MatchGrid(5, 3, 30, ['#7e9a9a', '#f6d8ac', 'Cursive']);
+const newGame = new MatchGrid(5, 3, 2, ['#7e9a9a', '#f6d8ac', 'Cursive']);
+
+newGame.initStyles();
 
 startBtn.addEventListener('click', startHandler);
 resetBtn.addEventListener('click', resetHandler);
