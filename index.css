@@ -1,9 +1,16 @@
+:root {
+    --isSolved: green;
+    --isUnsolved: red;
+    --changed-font: sans-serif;
+}
+
 body {
     display: flex;
     flex-direction: column;
     padding: 0;
     margin: 0;
     min-height: 100vw;
+    font-family: var(--changed-font), sans-serif;
 }
 .match__container {
     display: flex;
@@ -22,12 +29,12 @@ body {
     display: grid;
     justify-content: center;
     align-items: center;
-    background-color: red;
+    background-color: var(--isUnsolved);
     border: 2px solid black;
 }
 
 .match__grid-cell.is-match {
-    background-color: green;
+    background-color: var(--isSolved);
 }
 .match__navigation {
     display: flex;

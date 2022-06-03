@@ -2,19 +2,21 @@ const startBtn = document.querySelector('.start-btn');
 const resetBtn = document.querySelector('.reset-btn');
 const pageWrapper = document.querySelector('.match__grid');
 const msgContainer = document.querySelector('.match__navigation-message');
+const root = document.querySelector(':root');
 
 class MatchGrid {
-    _chosenCardsIds = [];
     toggleCardCb = this._toggleCard.bind(this)
+    _chosenCardsIds = [];
     _isPaused;
     _outCardsCb = this._outHandler.bind(this)
     _hoverCardsCb = this._hoverCardHelper.bind(this)
 
 
-    constructor(width, height, time) {
+    constructor(width, height, time, theme) {
         this.width = width
         this.heigth = height
         this.time = time
+        this.theme = theme
     }
 
     startTimer() {
@@ -43,13 +45,26 @@ class MatchGrid {
                         easing: 'linear',
                         duration: 3000,
                     })
+                    this.showMessage('time out')
                     this._removeWrapperListener();
                     clearInterval(interval);
                 }
             }
         }, 1000);
     }
-
+    showMessage(message) {
+        msgContainer.innerHTML = message;
+        anime({
+            targets: msgContainer,
+            translateY: {
+                value: ['0', '30vh'],
+            },
+            scale: 4,
+            easing: 'linear',
+            duration: 3000,
+        })
+        this._isPaused = true;
+    }
     initiateBoard() {
         this._preparingData().forEach(el => {
             const activity = document.createElement('div')
@@ -57,6 +72,10 @@ class MatchGrid {
             activity.setAttribute('data-id', el);
             pageWrapper.appendChild(activity);
         })
+        root.style.setProperty('--isSolved', this.theme[0]);
+        root.style.setProperty('--isUnsolved', this.theme[1]);
+        root.style.setProperty('--changed-font', this.theme[2]);
+        console.log(this.theme);
 
         pageWrapper.style.gridTemplate = `repeat(${this.heigth},2fr)/repeat(${this.width}, 2fr)`;
         this._addingWrapperListener();
@@ -106,13 +125,17 @@ class MatchGrid {
 
     _checkForMatch() {
         const isMatchWithoutClass = (el) => el.innerHTML === this._chosenCardsIds[0].id && el.innerHTML === this._chosenCardsIds[1].id && !el.classList.contains('is-match')
-        document.querySelectorAll('.match__grid-cell').forEach(el => {
+        const cellsArray = document.querySelectorAll('.match__grid-cell');
+        cellsArray.forEach(el => {
             if (isMatchWithoutClass(el)) {
                 el.classList.add('is-match');
             }
             el.innerHTML = el.classList.contains('is-match') ? el.innerHTML : '';
         })
         this._chosenCardsIds = []
+        if([...cellsArray].every(el => el.classList.contains('is-match'))) {
+            this.showMessage('you won');
+        }
     }
 
     _outHandler(event) {
@@ -130,7 +153,7 @@ class MatchGrid {
     }
 }
 
-const newGame = new MatchGrid(5, 3, 30);
+const newGame = new MatchGrid(5, 3, 30, ['#7e9a9a', '#f6d8ac', 'Cursive']);
 
 startBtn.addEventListener('click', startHandler);
 resetBtn.addEventListener('click', resetHandler);
