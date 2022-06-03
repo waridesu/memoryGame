@@ -156,7 +156,7 @@ class MatchGrid {
     }
 }
 
-const newGame = new MatchGrid(5, 3, 2, ['#7e9a9a', '#f6d8ac', 'Cursive']);
+const newGame = new MatchGrid(5, 3, 30, ['#7e9a9a', '#f6d8ac', 'Cursive']);
 
 newGame.initStyles();
 
