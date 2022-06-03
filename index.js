@@ -4,87 +4,140 @@ const pageWrapper = document.querySelector('.match__grid');
 const msgContainer = document.querySelector('.match__navigation-message');
 
 class MatchGrid {
-    chosenCardsIds = [];
-    match;
+    _chosenCardsIds = [];
+    toggleCardCb = this._toggleCard.bind(this)
+    _isPaused;
+    _outCardsCb = this._outHandler.bind(this)
+    _hoverCardsCb = this._hoverCardHelper.bind(this)
+
 
     constructor(width, height, time) {
         this.width = width
         this.heigth = height
         this.time = time
-        this.toggleCardCallBack = this.toggleCard.bind(this)
     }
 
     startTimer() {
         let time = this.time
+        anime({
+            targets: msgContainer,
+            translateY: 0,
+            scale: 1,
+        })
         msgContainer.innerHTML = `time: <span class="counter">${time}</span> seconds remaining!`;
         const counter = msgContainer.querySelector('.counter')
-        const interval = setInterval( () => {
-            time = --time
-            if (time > 0) {
-                counter.innerHTML = time
+        const interval = setInterval(() => {
+            if (!this._isPaused) {
+                time = --time
+                if (time > 0) {
 
-            } else {
-                msgContainer.innerHTML = 'time out';
-                pageWrapper.removeEventListener('click', this.toggleCardCallBack)
-                clearInterval(interval);
-            } }, 1000);
+                    counter.innerHTML = time
+                } else {
+                    msgContainer.innerHTML = 'time out';
+                    anime({
+                        targets: msgContainer,
+                        translateY: {
+                            value: ['0', '30vh'],
+                        },
+                        scale: 4,
+                        easing: 'linear',
+                        duration: 3000,
+                    })
+                    this._removeWrapperListener();
+                    clearInterval(interval);
+                }
+            }
+        }, 1000);
     }
 
     initiateBoard() {
+        this._preparingData().forEach(el => {
+            const activity = document.createElement('div')
+            activity.classList.add('match__grid-cell')
+            activity.setAttribute('data-id', el);
+            pageWrapper.appendChild(activity);
+        })
+
+        pageWrapper.style.gridTemplate = `repeat(${this.heigth},2fr)/repeat(${this.width}, 2fr)`;
+        this._addingWrapperListener();
+        this.startTimer();
+    }
+
+    _addingWrapperListener() {
+        pageWrapper.addEventListener('click', this.toggleCardCb)
+        pageWrapper.addEventListener('mouseover', this._hoverCardsCb)
+        pageWrapper.addEventListener('mouseout', this._hoverCardsCb)
+        pageWrapper.addEventListener('mouseleave', this._outCardsCb)
+        pageWrapper.addEventListener('mouseenter', this._outCardsCb)
+    }
+
+    _removeWrapperListener() {
+        pageWrapper.removeEventListener('click', this.toggleCardCb)
+        pageWrapper.removeEventListener('mouseover', this._hoverCardsCb)
+        pageWrapper.removeEventListener('mouseout', this._hoverCardsCb)
+        pageWrapper.removeEventListener('mouseleave', this._outCardsCb)
+        pageWrapper.removeEventListener('mouseenter', this._outCardsCb)
+    }
+
+    _preparingData() {
         let renderMatrix = new Array(this.width * this.heigth)
             .fill(null)
             .map((_, i) => ++i);
         renderMatrix = [...renderMatrix].slice(0, renderMatrix.length / 2)
             .reduce((res, cur) => [...res, cur, cur], [])
             .sort(() => Math.random() - 0.5);
-        renderMatrix.forEach(el => {
-            const activity = document.createElement('div')
-            activity.classList.add('match__grid-cell')
-            activity.setAttribute('data-id', el);
-            pageWrapper.appendChild(activity);
-        })
-        pageWrapper.style.gridTemplate = `repeat(${this.heigth},2fr)/repeat(${this.width}, 2fr)`;
-        pageWrapper.addEventListener('click', this.toggleCardCallBack)
-        this.startTimer();
+        return renderMatrix;
     }
 
-    toggleCard(event) {
-        if (this.chosenCardsIds.length !== 2) {
-            if (event.target.classList.contains('match__grid-cell')) {
+    _toggleCard(event) {
+            if (event.target.classList.contains('match__grid-cell') && this._chosenCardsIds.length !== 2) {
                 const cardId = event.target.getAttribute('data-id')
                 const elIndex = [].indexOf.call(event.target.parentElement.children, event.target);
                 event.target.innerHTML = cardId;
-                if ((this.chosenCardsIds.length === 0) || this.chosenCardsIds.some(({index}) => index !== elIndex)) {
-                    this.chosenCardsIds.push({id: cardId, index: elIndex})
+                const isNotInArray = (this._chosenCardsIds.length === 0) || this._chosenCardsIds.some(({index}) => index !== elIndex)
+                if (isNotInArray) {
+                    this._chosenCardsIds.push({id: cardId, index: elIndex})
                 }
-                if (this.chosenCardsIds.length === 2) {
-                    setTimeout(this.checkForMatch.bind(this), 200)
+                if (this._chosenCardsIds.length === 2) {
+                    setTimeout(this._checkForMatch.bind(this), 200)
                 }
             }
-        }
     }
 
-    checkForMatch() {
-        console.log(this.chosenCardsIds[0].id, this.chosenCardsIds[1].id);
+    _checkForMatch() {
+        const isMatchWithoutClass = (el) => el.innerHTML === this._chosenCardsIds[0].id && el.innerHTML === this._chosenCardsIds[1].id && !el.classList.contains('is-match')
         document.querySelectorAll('.match__grid-cell').forEach(el => {
-            if (el.innerHTML === this.chosenCardsIds[0].id && el.innerHTML === this.chosenCardsIds[1].id && !el.classList.contains('is-match')) {
-                ++this.match;
+            if (isMatchWithoutClass(el)) {
                 el.classList.add('is-match');
             }
             el.innerHTML = el.classList.contains('is-match') ? el.innerHTML : '';
         })
-        this.chosenCardsIds = []
+        this._chosenCardsIds = []
+    }
+
+    _outHandler(event) {
+        this._isPaused = event.type === 'mouseleave';
+    }
+
+    _hoverCardHelper(event) {
+        if (event.target.classList.contains('match__grid-cell')) {
+            anime({
+                targets: event.target,
+                scale: event.type === 'mouseover' ? 1.1 : 1,
+                borderRadius: event.type === 'mouseover' ? '10px' :'0',
+            })
+        }
     }
 }
 
-const newGame = new MatchGrid(5, 3, 20 );
+const newGame = new MatchGrid(5, 3, 30);
 
 startBtn.addEventListener('click', startHandler);
 resetBtn.addEventListener('click', resetHandler);
 
 function resetHandler() {
     pageWrapper.replaceChildren();
-    pageWrapper.removeEventListener('click', newGame.toggleCardCallBack)
+    pageWrapper.removeEventListener('click', newGame.toggleCardCb)
     newGame.initiateBoard();
 }
 
